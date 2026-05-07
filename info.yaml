@@ -29,7 +29,7 @@ pinout:
   ui[1]: "Player2_In"
   ui[2]: "Player3_In"
   ui[3]: "Player4_In"
-  ui[4]: ""
+  ui[4]: "Game_Reset"
   ui[5]: ""
   ui[6]: ""
   ui[7]: ""

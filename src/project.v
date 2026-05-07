@@ -33,8 +33,10 @@ module tt_um_KK_VGA01(
   assign uio_out = 0;
   assign uio_oe  = 0;
 
+  wire gameplay_reset = ~rst_n | ui_in[4];
+
   // Suppress unused signals warning
-  wire _unused_ok = &{ena, ui_in, uio_in};
+  wire _unused_ok = &{ena, ui_in[7:5], uio_in};
 
   hvsync_generator hvsync_gen(
     .clk(clk),
@@ -63,7 +65,7 @@ module tt_um_KK_VGA01(
     .hsync(hsync),
     .vsync(vsync),
     .clk(clk),
-    .reset(~rst_n),
+    .reset(gameplay_reset),
     .ctrl(mt_ctrl)
   );
 
