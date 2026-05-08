@@ -30,6 +30,7 @@ module motor_handler(
   input wire        vsync,
   input wire        clk,
   input wire        reset,
+  input wire[1:0]   game_speed,
   output wire[14:0] ctrl
 );
   reg[1:0] reshold;
@@ -101,10 +102,12 @@ module motor_handler(
   always @(posedge vsync) begin
     spdcnt <= {spdcnt[0], ~spdcnt[1]};
   end
+  wire speed_each_frame = game_speed[1] & game_speed[0];
+  wire speed_clk = speed_each_frame ? vsync : spdcnt[1];
 
   assign ctrl = {
     hpos[0] ^ vpos[0],                      // [14] deathmask
-    spdcnt[1],                              // [13] spdclk
+    speed_clk,                              // [13] spdclk
     movgate,                                // [12:9] mov index
     movop[2],                               // [8] mov echo
     movop[1],                               // [7] mov start
