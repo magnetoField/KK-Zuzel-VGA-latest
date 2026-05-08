@@ -58,6 +58,7 @@ module tt_um_KK_VGA01(
     .hpos(pix_x),
     .vpos(pix_y),
     .clk(clk),
+    .game_track(game_track),
     .trkout(trkon)
   );
 
