@@ -41,7 +41,7 @@ module tt_um_KK_VGA01(
   wire gameplay_reset = hard_reset | user_reset;
 
   // Suppress unused signals warning
-  wire _unused_ok = &{ena, ui_in[7:5], game_track, game_speed, uio_in[7:4]};
+  wire _unused_ok = &{ena, ui_in[7:5], game_speed, uio_in[7:4]};
 
   hvsync_generator hvsync_gen(
     .clk(clk),
@@ -79,12 +79,26 @@ module tt_um_KK_VGA01(
     steer <= ui_in[3:0];
   end
 
-  // RESET_Y min/max = 295..456
+  wire gt0 = game_track[0];
+  wire gt1 = game_track[1];
+  wire gt_or   = gt1 | gt0;
+  wire gt_and  = gt1 & gt0;
+  wire gt_xor  = gt1 ^ gt0;
+  wire gt_xnor = ~gt_xor;
+  wire gt_nor  = ~gt_or;
+  wire ngt0 = ~gt0;
+  wire ngt1 = ~gt1;
+
+  wire [9:0] reset_y1 = {1'b0, 1'b1, 1'b0,  ~gt_and, gt_xnor, gt0,  4'b0000};
+  wire [9:0] reset_y2 = {1'b0, 1'b1, 1'b0,   1'b1,   ngt1,    ngt0, 4'b0000};
+  wire [9:0] reset_y3 = {1'b0, 1'b1, gt_nor, gt_or,  gt_xor,  gt0,  4'b0000};
+  wire [9:0] reset_y4 = {1'b0, 1'b1, ngt1,   gt1,    gt1,     ngt0, 4'b0000};
+
   wire sp1on, sp2on, sp3on, sp4on;
-  motor_core motor1( .RESET_Y(10'd322), .ctrl(mt_ctrl), .clk(clk), .steer(steer[0]), .hpos(pix_x), .vpos(pix_y), .hsync(hsync), .track_in(trkon), .spron(sp1on) );
-  motor_core motor2( .RESET_Y(10'd355), .ctrl(mt_ctrl), .clk(clk), .steer(steer[1]), .hpos(pix_x), .vpos(pix_y), .hsync(hsync), .track_in(trkon), .spron(sp2on) );
-  motor_core motor3( .RESET_Y(10'd388), .ctrl(mt_ctrl), .clk(clk), .steer(steer[2]), .hpos(pix_x), .vpos(pix_y), .hsync(hsync), .track_in(trkon), .spron(sp3on) );
-  motor_core motor4( .RESET_Y(10'd421), .ctrl(mt_ctrl), .clk(clk), .steer(steer[3]), .hpos(pix_x), .vpos(pix_y), .hsync(hsync), .track_in(trkon), .spron(sp4on) );
+  motor_core motor1( .RESET_Y(reset_y1), .ctrl(mt_ctrl), .clk(clk), .steer(steer[0]), .hpos(pix_x), .vpos(pix_y), .hsync(hsync), .track_in(trkon), .spron(sp1on) );
+  motor_core motor2( .RESET_Y(reset_y2), .ctrl(mt_ctrl), .clk(clk), .steer(steer[1]), .hpos(pix_x), .vpos(pix_y), .hsync(hsync), .track_in(trkon), .spron(sp2on) );
+  motor_core motor3( .RESET_Y(reset_y3), .ctrl(mt_ctrl), .clk(clk), .steer(steer[2]), .hpos(pix_x), .vpos(pix_y), .hsync(hsync), .track_in(trkon), .spron(sp3on) );
+  motor_core motor4( .RESET_Y(reset_y4), .ctrl(mt_ctrl), .clk(clk), .steer(steer[3]), .hpos(pix_x), .vpos(pix_y), .hsync(hsync), .track_in(trkon), .spron(sp4on) );
 
   wire mR = sp1on | sp4on;
   wire mG1 = sp2on | sp3on | sp4on;
